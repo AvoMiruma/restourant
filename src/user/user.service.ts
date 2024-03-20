@@ -3,6 +3,7 @@ import { DatabaseService } from 'src/database/database.service';
 import { UserDto } from './dto/user.dto';
 import { UserUpdateDto } from './dto/userUpdate.dto';
 import { UserDeleteDto } from './dto/userDelete.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -46,13 +47,14 @@ export class UserService {
     }
 
     async update(dto: UserUpdateDto) {
+        const hashPassword = await bcrypt.hash(dto.password, 5);
         const user = await this.databaseService.user.update({
             where: {
                 email: dto.email
             },
             data: {
                 name: dto.name,
-                password: dto.password,
+                password: hashPassword,
                 roles: {
                     set: {
                         id: dto.rolesId

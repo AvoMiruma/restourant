@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { AuthenticateDto } from './dto/authenticate.dto';
 import { sign } from 'jsonwebtoken';
 import { RegistrationDto } from './dto/registration.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -12,14 +13,14 @@ export class AuthService {
         const user = await this.databaseService.user.findUnique({
             where: {
                 email: dto.email,
-                password: dto.password
             },
             include: {
                 roles: true
             }
         });
 
-        if(!user) throw new NotFoundException("Invalid credentials");
+        const isMatch = await bcrypt.compare(dto.password, user.password)
+        if(!isMatch) throw new UnauthorizedException("Invalid credentials")
 
         const token = sign({...user}, 'secrete');
         return {token, user}
@@ -33,9 +34,12 @@ export class AuthService {
         });
 
         if(checkUser) throw new BadRequestException("Invalid credentials");
-
+        const hashPassword = await bcrypt.hash(dto.password, 5)
         const user = await this.databaseService.user.create({
-            data: dto
+            data: {
+                ...dto,
+                password: hashPassword
+            }
         });
         const token = sign({...user}, 'secrete');
         return {token, user}
