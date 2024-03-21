@@ -3,8 +3,9 @@ import { AuthService } from './auth.service';
 import { AuthenticateDto } from './dto/authenticate.dto';
 import { RegistrationDto } from './dto/registration.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
-/*skdfjsdoaf*/ 
+/**
+ * flksldaf
+ */
 @ApiTags('Auth-Controller')
 @Controller('auth')
 export class AuthController {
